@@ -37,7 +37,7 @@ jobs:
         go-version: '1.17'
 
     - name: test ./...
-      run: go test --tags=examples ./...
+      run: go test --tags=examples -covermode=atomic -coverprofile=coverage.out ./...
       env:
         PG_USER: postgres
         PG_HOST: localhost
@@ -54,5 +54,13 @@ jobs:
       working-directory: internal/endtoend/testdata
 
     - name: test internal/endtoend
-      run: go test ./...
+      run: go test -covermode=atomic -coverprofile=end2end.out ./...
       working-directory: internal/endtoend/testdata
+
+    - uses: codecov/codecov-action@v2
+      name: Upload coverage to Codecov
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: ./coverage.out,internal/endtoend/testdata/end2end.out
+        fail_ci_if_error: true
+        verbose: true
